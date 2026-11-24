@@ -266,7 +266,35 @@ export async function execute(plan: CognitivePlan, ctx: ExecutionContext): Promi
         const { commitPending } = await import("@/modules/code/services/commit.server");
         const r = await commitPending(db, ctx.userId, project.id, String(plan.params["message"]));
         if (!r) return { ok: true, text: "Nada para enviar." };
-        return { ok: true, text: `✔ Commit \`${r.sha.slice(0, 7)}\` enviado ao GitHub (${r.count} arquivo(s)) — alterações **persistidas**.`, data: { sha: r.sha } };
+        return {
+          ok: true,
+          text: `✔ Commit \`${r.sha.slice(0, 7)}\` enviado ao GitHub (${r.count} arquivo(s)) — alterações **persistidas**.${r.backupId ? `\nPara reverter, use o botão Rollback ou digite \`rollback\`.` : ""}`,
+          data: { sha: r.sha, count: r.count, backupId: r.backupId, message: r.message }
+        };
+      }
+      case "ROLLBACK": {
+        if (!project.repo_full_name) return fail("Este projeto não tem repositório GitHub vinculado.");
+        const explicitId = String(plan.params["backupId"] ?? "").trim();
+        let backupId = explicitId;
+        if (!backupId) {
+          const { listBackups } = await import("@/modules/code/services/backup.server");
+          const backups = await listBackups(db, ctx.userId, project.id);
+          if (!backups.length) return fail("Nenhum backup de commit encontrado para este projeto.");
+          backupId = backups[0].id;
+        }
+        const { data: targetBackup } = await db.from("code_project_backups").select("id, message, commit_sha, created_at").eq("id", backupId).single();
+        if (!targetBackup) return fail(`Backup ${backupId} não encontrado.`);
+        const targetRef = targetBackup.commit_sha ? targetBackup.commit_sha.slice(0, 7) : targetBackup.id.slice(0, 7);
+        if (!ctx.confirmed) {
+          return confirmPrompt(plan, `\nRestaurar projeto para o backup \`${targetRef}\` ("${targetBackup.message}").\nOs arquivos atuais serão substituídos e um novo commit de rollback será enviado ao GitHub.`);
+        }
+        const { revertBackup } = await import("@/modules/code/services/backup.server");
+        const res = await revertBackup(db, ctx.userId, backupId);
+        return {
+          ok: true,
+          text: `✔ Rollback concluído: projeto restaurado para o backup \`${targetRef}\` (commit \`${res.sha.slice(0, 7)}\`).`,
+          data: { revertedBackupId: backupId, newCommitSha: res.sha }
+        };
       }
       case "TEST":
       case "RUN_COMMAND": {

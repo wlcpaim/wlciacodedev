@@ -138,13 +138,34 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
           headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
           body: JSON.stringify({ sourceBot: "wlc-code", command: prompt, meta: { projectId, sessionKey: `project:${projectId}` } }),
         });
-        const result = await response.json() as { ok?: boolean; reply?: string; error?: string; data?: { connection?: SystemConnection } };
+        const result = await response.json() as {
+          ok?: boolean;
+          reply?: string;
+          error?: string;
+          data?: {
+            connection?: SystemConnection;
+            sha?: string;
+            count?: number;
+            backupId?: string | null;
+            message?: string;
+          };
+        };
         if (!response.ok || !result.ok) {
           setConnection(null);
           setError(result.reply ?? result.error ?? "Falha no System."); setText(prompt); return;
         }
         setEntries(e => [...e, { id: crypto.randomUUID(), role: "model", content: result.reply ?? "" }]);
         if (result.data?.connection) setConnection(result.data.connection);
+        if (result.data?.sha && result.data?.backupId) {
+          window.dispatchEvent(new CustomEvent("wlc-commit-success", {
+            detail: {
+              sha: result.data.sha,
+              message: result.data.message || prompt,
+              count: result.data.count,
+              backupId: result.data.backupId,
+            }
+          }));
+        }
         window.dispatchEvent(new CustomEvent("wlc-reload-files"));
         return;
       }

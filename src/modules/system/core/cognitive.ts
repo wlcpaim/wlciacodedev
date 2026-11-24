@@ -77,6 +77,8 @@ const COMMANDS: Record<string, CommandSpec> = {
   diff: { intent: "DIFF", capability: "system.repo.read", args: (a) => ({ path: a[0] ?? "" }) },
   test: { intent: "TEST", capability: "system.orchestrate", confirm: true, args: (a) => ({ command: a.join(" ") || "npm test" }) },
   commit: { intent: "COMMIT", capability: "system.repo.write", confirm: true, args: (a) => ({ message: a.join(" ").trim() || "chore: alterações via WLC System" }) },
+  rollback: { intent: "ROLLBACK", capability: "system.repo.write", confirm: true, args: (a) => ({ backupId: a[0] ?? "" }) },
+  revert: { intent: "ROLLBACK", capability: "system.repo.write", confirm: true, args: (a) => ({ backupId: a[0] ?? "" }) },
   run: { intent: "RUN_COMMAND", capability: "system.orchestrate", confirm: true, args: (a) => (a.length ? { command: a.join(" ") } : "Informe o comando. Ex: `run npm run build`") },
   deploy: { intent: "DEPLOY", capability: "system.deploy", confirm: true },
   versions: { intent: "LIST_VERSIONS", capability: "system.versions" },
@@ -104,6 +106,8 @@ const PHRASES: Array<{ re: RegExp; to: (m: RegExpMatchArray) => string }> = [
   { re: /^(fazer deploy|publicar)$/i, to: () => "deploy" },
   { re: /^(rodar|executar comando)\s+(.+)$/i, to: (m) => `run ${m[2]}` },
   { re: /^(alterações|mudanças)( pendentes)?$/i, to: () => "diff" },
+  { re: /^(fazer )?rollback(\s+(\S+))?$/i, to: (m) => `rollback ${m[3] ?? ""}`.trim() },
+  { re: /^(desfazer|reverter)( o)? commit(\s+(\S+))?$/i, to: (m) => `rollback ${m[4] ?? ""}`.trim() },
 ];
 
 function splitArgs(line: string): string[] {
@@ -178,6 +182,7 @@ export function helpText(): string {
     "diff [arquivo]           alterações locais ainda não enviadas",
     "test [comando]           roda testes no WLC Runner (GitHub Actions) *",
     "commit [mensagem]        envia as alterações ao GitHub *",
+    "rollback [backupId]     reverte para o último backup (ou ID indicado) *",
     "status                   estado da sessão",
     "```",
     "`*` pede confirmação (`confirmar` / `cancelar`).",
