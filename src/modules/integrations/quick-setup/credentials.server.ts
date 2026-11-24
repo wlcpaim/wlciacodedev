@@ -13,7 +13,13 @@ export const DEFAULT_CREDENTIALS = {
     "AQ.Ab8RN6Ka7F7ugFtlovlSSXJAXxIlX5f1nLzTOuSGB9N0Nd0NUg",
     "AQ.Ab8RN6IfICoFV8iFXSQuwNbI9NmPAlXWSAMC8kMbfdn8-pIbBQ",
   ],
-  github: "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",
-  cloudflare: { accountId: "d527ca26abe33322d70f9832238ae0ea", token: "cfut_ZFWKGMkd76mds155cRm2YpXH5Kfk6Aib5T6R0sS3d77b888a" },
-  database: { url: "https://wnmrtobkvuqtmomizanz.supabase.co", key: "sb_publishable_r1USqpyrj-RymBwrqIQimQ_uoD46GOB" },
+  github: "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",
+  cloudflare: { 
+    accountId: "d527ca26abe33322d70f9832238ae0ea", 
+    token: "cfat_sggv4brCoxh4OTB8sPByCU29gAIjaRjybmC0dnR21690775f" 
+  },
+  database: { 
+    url: "https://wnmrtobkvuqtmomizanz.supabase.co", 
+    key: "sb_publishable_r1USqpyrj-RymBwrqIQimQ_uoD46GOB" 
+  },
 };
