@@ -16,7 +16,7 @@ export const DEFAULT_CREDENTIALS = {
   github: "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",
   cloudflare: { 
     accountId: "d527ca26abe33322d70f9832238ae0ea", 
-    token: "cfat_sggv4brCoxh4OTB8sPByCU29gAIjaRjybmC0dnR21690775f" 
+    token: "cfut_WNtxFNrIkNTVV5pOJCxCPShCQ1I3EHP5U7noD0Dl914b9c01" 
   },
   database: { 
     url: "https://wnmrtobkvuqtmomizanz.supabase.co", 
