@@ -1,4 +1,5 @@
 // Escrita no GitHub (criar repositório e commits) — solicitada explicitamente para a área Code.
+import JSZip from "jszip";
 import { GITHUB_API_URL } from "@/config/app";
 import { GithubError } from "@/modules/integrations/github/services/api.server";
 import { exclusionReason } from "@/modules/integrations/github/services/repository.server";
@@ -46,21 +47,41 @@ export async function loadEditableRepo(token: string, repo: string) {
   }
   const commit = await ghCall<{ tree: { sha: string } }>(token, "GET", `/repos/${repo}/git/commits/${sha}`);
   const tree = await ghCall<{ tree: { path: string; type: string; sha: string; size?: number }[] }>(token, "GET", `/repos/${repo}/git/trees/${commit.tree.sha}?recursive=1`);
-  const blobs = tree.tree
-    .filter((e) => e.type === "blob" && !/\.(env)$/.test(e.path))
-    .filter((e) => !exclusionReason(e.path, e.size ?? 0))
-    .slice(0, MAX_FILES);
+  const zipRes = await fetch(`${GITHUB_API_URL}/repos/${repo}/zipball/${encodeURIComponent(branch)}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "WLC-IA",
+    },
+  });
+
+  if (!zipRes.ok) {
+    let msg = zipRes.statusText;
+    try { msg = ((await zipRes.json()) as { message?: string }).message ?? msg; } catch {}
+    throw new GithubError(zipRes.status, friendly(zipRes.status, msg));
+  }
+
+  const zipBuffer = await zipRes.arrayBuffer();
+  const zip = await JSZip.loadAsync(zipBuffer);
   const files: LoadedFile[] = [];
-  for (let i = 0; i < blobs.length; i += 8) {
-    const batch = await Promise.all(blobs.slice(i, i + 8).map(async (b) => {
-      const blob = await ghCall<{ content: string }>(token, "GET", `/repos/${repo}/git/blobs/${b.sha}`);
-      const bin = atob(blob.content.replace(/\s/g, ""));
-      try {
-        const content = new TextDecoder("utf-8", { fatal: true }).decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
-        return content.includes("\0") ? null : { path: b.path, content };
-      } catch { return null; }
-    }));
-    files.push(...batch.filter((f): f is LoadedFile => f !== null));
+
+  for (const [rawPath, entry] of Object.entries(zip.files)) {
+    if (entry.dir) continue;
+    const parts = rawPath.split("/");
+    parts.shift();
+    const filePath = parts.join("/");
+
+    if (!filePath || exclusionReason(filePath, 0) || /\.(env)$/.test(filePath)) continue;
+
+    try {
+      const content = await entry.async("string");
+      if (!content.includes("\0")) {
+        files.push({ path: filePath, content });
+      }
+    } catch {}
+
+    if (files.length >= MAX_FILES) break;
   }
   return { branch, sha, files };
 }
