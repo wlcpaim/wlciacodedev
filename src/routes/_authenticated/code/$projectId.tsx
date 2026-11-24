@@ -79,8 +79,15 @@ function EditorPage() {
       void reloadFiles();
       void qc.invalidateQueries({ queryKey: ["code-project", projectId] });
     };
+    const handleOpenCommit = () => {
+      void flush().then(() => setCommitOpen(true)).catch(() => setCommitOpen(true));
+    };
     window.addEventListener("wlc-reload-files", handleReload);
-    return () => window.removeEventListener("wlc-reload-files", handleReload);
+    window.addEventListener("wlc-open-commit-dialog", handleOpenCommit);
+    return () => {
+      window.removeEventListener("wlc-reload-files", handleReload);
+      window.removeEventListener("wlc-open-commit-dialog", handleOpenCommit);
+    };
   }, [projectId]);
 
   const syncFiles = async () => {

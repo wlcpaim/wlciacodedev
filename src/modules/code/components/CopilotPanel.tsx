@@ -4,7 +4,7 @@ import { VersionSelector } from "@/modules/versions/components/VersionSelector";
 import { customVersionId, copilotHistoryKey, useSelectedVersion, PRO_SLUG, SYSTEM_SLUG } from "@/modules/versions/selected";
 import { supabase } from "@/integrations/supabase/client";
 import type { SystemConnection } from "@/modules/system/core/connection";
-import { ArrowUp, Check, Code2, FileCode2, Loader2, Square, X, RotateCcw, PlugZap } from "lucide-react";
+import { ArrowUp, Check, Code2, FileCode2, Loader2, Square, X, RotateCcw, PlugZap, GitCommit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
 import { Markdown } from "@/components/chat/Markdown";
@@ -241,9 +241,21 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
               {entry.commitData?.backupId && (
                 <div className="flex items-center justify-between pt-1">
                   {entry.commitData.reverted ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
-                      <Check className="h-3.5 w-3.5" /> Revertido com sucesso
-                    </span>
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-success">
+                        <Check className="h-3.5 w-3.5" /> Revertido com sucesso
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 gap-1.5 text-xs"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("wlc-open-commit-dialog"));
+                        }}
+                      >
+                        <GitCommit className="h-3.5 w-3.5" /> Commit
+                      </Button>
+                    </div>
                   ) : (
                     <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={revertingId === entry.id} onClick={async () => {
                       if (!entry.commitData?.backupId) return;
