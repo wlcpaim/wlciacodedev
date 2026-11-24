@@ -24,6 +24,7 @@ export function useSelectedVersion(): string | null {
 export const BASE_SLUG = "wlc-1.5.6";
 export const PRO_SLUG = "wlc-1.7.1-pro";
 export const SYSTEM_SLUG = "wlc-1.1.0-system";
+export const COPILOT_199_SLUG = "wlc-1.9.9-copilot";
 export const SYSTEM_GREETING =
   "Olá. Sou a WLC 1.1.0 System — ambiente Owner isolado. Não uso Gemini. Opero com sistema cognitivo próprio em TypeScript. Envie comandos ou descreva a alteração que deseja no sistema.";
 export function customVersionId(id: string | null): string | null {

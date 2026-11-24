@@ -20,8 +20,8 @@ export function QuickSetupButton() {
     <section className="rounded-xl border bg-card p-4 md:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold">Check & Preencher todas as APIs</h2>
-          <p className="text-sm text-muted-foreground">Gemini, GitHub, Cloudflare e banco em um clique.</p>
+          <h2 className="font-semibold">Check & Preencher Gemini</h2>
+          <p className="text-sm text-muted-foreground">Gemini em um clique.</p>
         </div>
         <Button onClick={go} disabled={busy}><Zap className="h-4 w-4" />{busy ? "Verificando…" : "Check"}</Button>
       </div>

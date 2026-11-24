@@ -31,8 +31,6 @@ export const quickSetupAll = createServerFn({ method: "POST" })
       }
       return `${added} adicionadas, ${C.gemini.length - added} já existiam`;
     });
-    await run("GitHub", async () => `@${(await connect(db, uid, C.github)).login}`);
-    await run("Cloudflare", async () => (await connectCf(db, uid, C.cloudflare.accountId, C.cloudflare.token)).account_name ?? "conectada");
-    await run("Banco de dados", async () => { await saveCfDb(db, uid, { url: C.database.url, key: C.database.key }); return C.database.url; });
+
     return { steps };
   });

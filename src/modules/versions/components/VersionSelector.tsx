@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { versionsQuery } from "../queries";
 import { syncChatVersions } from "../functions/versions.functions";
 import { BASE_VERSION } from "../instructions";
-import { PRO_SLUG, SYSTEM_SLUG, setSelectedVersion, useSelectedVersion } from "../selected";
+import { PRO_SLUG, SYSTEM_SLUG, COPILOT_199_SLUG, setSelectedVersion, useSelectedVersion } from "../selected";
 
 /** Auto-check a cada 1 minuto: busca versões novas/alteradas no repositório. */
 export function useVersionsAutoSync() {
@@ -30,14 +30,17 @@ export function VersionSelector() {
   const selected = useSelectedVersion();
   const isPro = selected === PRO_SLUG;
   const isSystem = selected === SYSTEM_SLUG;
+  const is199 = selected === COPILOT_199_SLUG;
   const current = data.find(v => v.id === selected);
   useEffect(() => { 
-    if (selected && !isPro && !isSystem && data.length && !current) {
+    if (selected && !isPro && !isSystem && !is199 && data.length && !current) {
       setSelectedVersion(null);
     }
-  }, [selected, isPro, isSystem, data, current]);
+  }, [selected, isPro, isSystem, is199, data, current]);
 
-  const activeName = isPro 
+  const activeName = is199
+    ? "WLC 1.9.9"
+    : isPro 
     ? "WLC 1.7.1" 
     : selected === SYSTEM_SLUG 
     ? "WLC 1.1.0" 
@@ -80,6 +83,15 @@ export function VersionSelector() {
             <span className="block text-xs text-muted-foreground">System</span>
           </span>
           {selected === SYSTEM_SLUG && <Check />}
+        </DropdownMenuItem>
+
+        {/* WLC 1.9.9 Copilot */}
+        <DropdownMenuItem onSelect={() => setSelectedVersion(COPILOT_199_SLUG)}>
+          <span className="flex-1">
+            <span className="block font-mono text-sm">WLC 1.9.9</span>
+            <span className="block text-xs text-muted-foreground">Copilot</span>
+          </span>
+          {is199 && <Check />}
         </DropdownMenuItem>
 
         {data.length > 0 && <DropdownMenuSeparator />}

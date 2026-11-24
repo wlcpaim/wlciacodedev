@@ -255,7 +255,7 @@ function EditorPage() {
         <Button asChild variant="ghost" size="icon-sm" aria-label="Projetos"><Link to="/code"><ArrowLeft /></Link></Button>
         <Button variant="ghost" size="icon-sm" title={explorerOpen ? "Recolher explorador" : "Abrir explorador"} aria-label={explorerOpen ? "Recolher explorador" : "Abrir explorador"} aria-expanded={explorerOpen} onClick={() => setExplorerOpen(v => !v)}><PanelLeft /></Button>
         <Button variant="ghost" size="icon-sm" title={editorOpen ? "Recolher editor" : "Abrir editor"} aria-label={editorOpen ? "Recolher editor" : "Abrir editor"} aria-expanded={editorOpen} onClick={() => setEditorOpen(v => !v)}><PanelsTopLeft /></Button>
-        <Code2 className="hidden h-4 w-4 shrink-0 text-primary sm:block" /><span className="shrink-0 font-mono text-[11px] font-semibold sm:text-xs">WLC IA CODE</span>
+        <Code2 className="hidden h-4 w-4 shrink-0 text-primary sm:block" /><span className="shrink-0 font-mono text-[11px] font-semibold sm:text-xs">Copilot</span>
         <span className="hidden text-muted-foreground sm:inline">/</span><span className="hidden min-w-0 truncate font-mono text-xs sm:inline">{p?.name}</span>
         {p?.repo_full_name && <span className="hidden items-center gap-1 truncate text-xs text-muted-foreground sm:flex"><Github className="h-3 w-3" />{p.repo_full_name}:{p.branch}</span>}
         {p?.deploy_url && <Button asChild variant="ghost" size="icon-sm" className="ml-auto" title={p.deploy_url} aria-label="Abrir site publicado"><a href={p.deploy_url} target="_blank" rel="noreferrer"><ExternalLink /></a></Button>}

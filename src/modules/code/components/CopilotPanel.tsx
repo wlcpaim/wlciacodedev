@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { VersionSelector } from "@/modules/versions/components/VersionSelector";
-import { customVersionId, copilotHistoryKey, useSelectedVersion, PRO_SLUG, SYSTEM_SLUG } from "@/modules/versions/selected";
+import { customVersionId, copilotHistoryKey, useSelectedVersion, PRO_SLUG, SYSTEM_SLUG, COPILOT_199_SLUG } from "@/modules/versions/selected";
 import { supabase } from "@/integrations/supabase/client";
 import type { SystemConnection } from "@/modules/system/core/connection";
 import { ArrowUp, Check, Code2, FileCode2, Loader2, Square, X, RotateCcw, PlugZap, GitCommit } from "lucide-react";
@@ -82,8 +82,17 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
   }, []);
   const isPro = selectedVersion === PRO_SLUG;
   const isSystem = selectedVersion === SYSTEM_SLUG;
+  const is199 = selectedVersion === COPILOT_199_SLUG;
   const versionId = customVersionId(selectedVersion);
-  const copilotName = isPro ? "Copilot WLC 1.7.1" : isSystem ? "Copilot WLC 1.1.0 System" : versionId ? "Copilot WLC" : "Copilot WLC 1.5.6";
+  const copilotName = is199
+    ? "Copilot WLC 1.9.9"
+    : isPro
+    ? "Copilot WLC 1.7.1"
+    : isSystem
+    ? "Copilot WLC 1.1.0 System"
+    : versionId
+    ? "Copilot WLC"
+    : "Copilot WLC 1.5.6";
 
   useEffect(() => {
     try {
@@ -105,7 +114,7 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
 
   // Shared project channel: commands sent by other sources (e.g. the orchestrator agent) appear here live.
   useEffect(() => {
-    if (!isSystem) return;
+    if (!isSystem && !is199) return;
     const channel = supabase
       .channel(`system-events-${projectId}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "system_events", filter: `project_id=eq.${projectId}` }, (payload) => {
@@ -117,7 +126,7 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [isSystem, projectId]);
+  }, [isSystem, is199, projectId]);
 
   const send = async () => {
     const prompt = text.trim();
@@ -129,7 +138,11 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
     try {
       await beforeSend();
       if (controller.signal.aborted) return;
-      if (isSystem) {
+      const isSystemCommand = isSystem || (is199 && (
+        /^(wlc:~\$|\$|\/)/.test(prompt) ||
+        /^(help|ajuda|status|connect|conectar|link|projects|projetos|use|ls|tree|read|cat|create|edit|delete|rm|rename|mv|search|grep|analyze|diagnose|fix|diff|test|commit|run|deploy|versions|repo|bridge|confirmar|cancelar)\b/i.test(prompt)
+      ));
+      if (isSystemCommand) {
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
         if (!token) throw new Error("Sessão expirada.");
@@ -171,7 +184,7 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
       }
       const result = await ask({ data: { projectId, message: prompt, activePath,
         history: entries.filter(e => e.role === "user" || e.role === "model").slice(-6).map(e => ({ role: e.role, content: e.content.slice(0, 2000) })),
-        ...(isPro ? { pro: true } : versionId ? { versionId } : {}),
+        ...(isPro || is199 ? { pro: true } : versionId ? { versionId } : {}),
       }, signal: controller.signal });
 
       if (controller.signal.aborted) return;
@@ -212,7 +225,7 @@ function VersionCopilotPanel({ projectId, activePath, beforeSend, onFocus, onApp
         {entries.length === 0 && <div className="py-10">
           <Code2 className="mb-4 h-8 w-8 text-primary" />
           <h1 className="font-mono text-xl font-semibold">{copilotName}</h1>
-          {isPro && <p className="mt-2 text-sm text-muted-foreground">Não precisa abrir arquivos: peça telas, funções ou estruturas completas e ele encontra e edita os lugares certos.</p>}
+          {(isPro || is199) && <p className="mt-2 text-sm text-muted-foreground">Não precisa abrir arquivos: peça telas, funções ou estruturas completas e ele encontra e edita os lugares certos.</p>}
         </div>}
         {entries.map(entry => <article key={entry.id} className="min-w-0 break-words">
           {entry.role === "commit" ? (
