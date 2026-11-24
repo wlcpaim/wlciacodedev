@@ -133,9 +133,14 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
+      // Link data imported from the old backend once a session exists (fresh sign-in or restored session).
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        void claimLegacyAccount().then((claimed) => {
+          if (claimed) { router.invalidate(); queryClient.invalidateQueries(); }
+        });
+      }
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
-      if (event === "SIGNED_IN") void claimLegacyAccount();
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

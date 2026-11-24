@@ -29,5 +29,5 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
-- Data imported from the old WLC IA backend keeps its original `user_id`s and is mapped through `public.legacy_users`; `claim_legacy_account()` (called on SIGNED_IN from `__root.tsx`) moves rows to the new auth user only on a unique verified-email match. Why: the old auth IDs do not exist in this backend, and identity must never be trusted from the client.
+- Data imported from the old WLC IA backend keeps its original `user_id`s and is mapped through `public.legacy_users`; `claim_legacy_account()` (called from `__root.tsx` whenever a session exists) moves rows to the new auth user only on a unique verified-email match. Why: the old auth IDs do not exist in this backend, and identity must never be trusted from the client.
 - `exec_migration` is executable by `service_role` only and `inspect_schema` by signed-in users (read-only). Why: the DBA bot applies DDL through the server; browsers must never reach the runner.
