@@ -13,7 +13,7 @@ export const DEFAULT_CREDENTIALS = {
     "AQ.Ab8RN6Ka7F7ugFtlovlSSXJAXxIlX5f1nLzTOuSGB9N0Nd0NUg",
     "AQ.Ab8RN6IfICoFV8iFXSQuwNbI9NmPAlXWSAMC8kMbfdn8-pIbBQ",
   ],
-  github: "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",
+  github: "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",
   cloudflare: { 
     accountId: "d527ca26abe33322d70f9832238ae0ea", 
     token: "cfut_WNtxFNrIkNTVV5pOJCxCPShCQ1I3EHP5U7noD0Dl914b9c01" 
