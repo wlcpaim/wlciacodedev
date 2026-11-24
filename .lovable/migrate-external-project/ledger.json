@@ -1,0 +1,17 @@
+{
+  "source": "code archive wlcia.zip (wlciasystemdev-main, Lovable TanStack Start + Lovable Cloud app 'WLC IA')",
+  "capabilities": [
+    {"capability": "code", "source": "src/** (chat, code editor + Copilot, versions, orchestrator, system bridge, settings)", "outcome": "migrate", "status": "in_progress", "next_action": "copy source into project, merge dependencies"},
+    {"capability": "schema", "source": "src/integrations/supabase/types.ts (no migrations in archive): 15 tables + inspect_schema/exec_migration RPCs", "outcome": "migrate", "status": "pending", "next_action": "recreate tables, RLS and functions in Lovable Cloud"},
+    {"capability": "records", "source": "previous Lovable Cloud database (not exported)", "outcome": "migrate", "status": "pending", "next_action": "request CSV/JSON exports of app tables after preview"},
+    {"capability": "auth identities", "source": "Google sign-in via Lovable managed auth", "outcome": "migrate", "status": "pending", "next_action": "enable Google sign-in; request users export (id, email)"},
+    {"capability": "authorization", "source": "per-user RLS (user_id = auth.uid())", "outcome": "migrate", "status": "pending", "next_action": "owner-scoped RLS on every table + legacy user claim mapping"},
+    {"capability": "uploaded file bytes", "source": "none detected (no storage buckets used)", "outcome": "not_applicable", "status": "verified", "next_action": "none"},
+    {"capability": "external providers", "source": "Gemini (user keys), GitHub (user tokens), Cloudflare (user tokens), Google Fonts", "outcome": "preserve", "status": "pending", "next_action": "keys are entered by each user in Settings; stored encrypted with INTEGRATIONS_MASTER_KEY"},
+    {"capability": "public endpoints", "source": "/api/public/jobs/gemini-recheck (cron-secret protected), /api/chat, /api/system/chat, /api/system/command (bearer-auth)", "outcome": "preserve", "status": "pending", "next_action": "copy routes"},
+    {"capability": "schedules", "source": "gemini-recheck cron (schedule definition not in archive)", "outcome": "preserve", "status": "pending", "next_action": "recreate pg_cron job calling the public job route"},
+    {"capability": "secrets", "source": "INTEGRATIONS_MASTER_KEY, LOVABLE_CRON_SECRET", "outcome": "migrate", "status": "pending", "next_action": "generate new values (old encrypted tokens cannot be decrypted; users re-enter keys)"},
+    {"capability": "cutover", "source": "old backend project", "outcome": "pending", "status": "pending", "next_action": "user re-points any GitHub workflows / bots to the new URL"},
+    {"capability": "verification", "source": "-", "outcome": "pending", "status": "pending", "next_action": "build, tests, routes, signed-in CRUD"}
+  ]
+}
